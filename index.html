@@ -193,60 +193,37 @@
     </div>
   </main>
 
-  <!-- Iframe invisible : reçoit la réponse de Google Form sans changer de page -->
-  <iframe
-    name="hidden_iframe"
-    id="hidden_iframe"
-    style="display: none;"
-  ></iframe>
-
-  <!-- Formulaire caché envoyé à Google Forms -->
-  <form
-    id="bipForm"
-    action="https://docs.google.com/forms/d/e/1FAIpQLSexte85q2U6GS90exQuqxyM7uLn2dWJPL5XG-T-i1l1FeVFlg/formResponse"
-    method="POST"
-    target="hidden_iframe"
-    style="display: none;"
-  >
-    <input type="hidden" name="entry.1214614171" value="BIP" />
-  </form>
-
   <script>
-    const COOLDOWN_MS = 30000;
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxRgsI1HZrxs3hDnHnP-w55z2WjH1REJEKAHRMUgqEd_EAbUYg8cRSpOoC_7XKN97RB/exec";
 
-    function sendBip() {
+    async function sendBip() {
       const button = document.getElementById("bipButton");
       const status = document.getElementById("status");
-      const form = document.getElementById("bipForm");
-
-      const lastBip = Number(localStorage.getItem("lastBip") || 0);
-      const now = Date.now();
-
-      if (now - lastBip < COOLDOWN_MS) {
-        const secondsLeft = Math.ceil((COOLDOWN_MS - (now - lastBip)) / 1000);
-        status.textContent = `Calme le bip. Réessaie dans ${secondsLeft}s 👀`;
-        return;
-      }
 
       button.disabled = true;
       button.classList.add("pulse");
       status.textContent = "Envoi du bip...";
 
       try {
-        form.submit();
+        // no-cors parce que Apps Script Web App ne gère pas toujours bien CORS.
+        // Le courriel peut quand même partir.
+        await fetch(SCRIPT_URL, {
+          method: "POST",
+          mode: "no-cors",
+          body: JSON.stringify({
+            action: "bip"
+          })
+        });
 
-        localStorage.setItem("lastBip", String(Date.now()));
-
+        status.textContent = "Bip envoyé. Opération presque invisible 🫡";
+      } catch (error) {
+        status.textContent = "Le bip a peut-être échoué. Tragédie.";
+        console.error(error);
+      } finally {
         setTimeout(() => {
-          status.textContent = "Bip envoyé. Opération presque invisible 🫡";
           button.disabled = false;
           button.classList.remove("pulse");
-        }, 1000);
-      } catch (error) {
-        status.textContent = "Le bip a échoué. Tragédie.";
-        button.disabled = false;
-        button.classList.remove("pulse");
-        console.error(error);
+        }, 1200);
       }
     }
   </script>
