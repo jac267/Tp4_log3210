@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>Biper secret</title>
+
+  <style>
+    :root {
+      --pink: #ef1981;
+      --dark: #070707;
+      --soft-dark: #151515;
+      --white: #ffffff;
+      --muted: #a8a8a8;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: Arial, Helvetica, sans-serif;
+      background:
+        radial-gradient(circle at top, rgba(239, 25, 129, 0.22), transparent 35%),
+        radial-gradient(circle at bottom, rgba(255, 255, 255, 0.08), transparent 30%),
+        var(--dark);
+      color: var(--white);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow: hidden;
+    }
+
+    .noise {
+      position: fixed;
+      inset: 0;
+      background-image: linear-gradient(
+        rgba(255, 255, 255, 0.03) 1px,
+        transparent 1px
+      );
+      background-size: 100% 4px;
+      pointer-events: none;
+      opacity: 0.25;
+    }
+
+    .card {
+      width: min(92vw, 460px);
+      padding: 32px;
+      border-radius: 28px;
+      background: rgba(21, 21, 21, 0.84);
+      border: 1px solid rgba(255, 255, 255, 0.09);
+      box-shadow:
+        0 24px 80px rgba(0, 0, 0, 0.55),
+        0 0 90px rgba(239, 25, 129, 0.14);
+      backdrop-filter: blur(14px);
+      text-align: center;
+    }
+
+    .badge {
+      display: inline-flex;
+      gap: 8px;
+      align-items: center;
+      justify-content: center;
+      padding: 8px 14px;
+      border-radius: 999px;
+      background: rgba(239, 25, 129, 0.13);
+      color: #ffd5ea;
+      font-size: 0.85rem;
+      margin-bottom: 18px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(2.4rem, 9vw, 4.5rem);
+      letter-spacing: -2px;
+      line-height: 1;
+    }
+
+    .subtitle {
+      margin: 14px auto 30px;
+      max-width: 340px;
+      color: var(--muted);
+      line-height: 1.5;
+      font-size: 1rem;
+    }
+
+    .bip-button {
+      position: relative;
+      width: 190px;
+      height: 190px;
+      border-radius: 50%;
+      border: none;
+      cursor: pointer;
+      color: white;
+      font-size: 2.5rem;
+      font-weight: 900;
+      letter-spacing: 1px;
+      background:
+        radial-gradient(circle at 35% 25%, #ff7cbd, transparent 28%),
+        linear-gradient(145deg, #ff2b9a, #b8005d);
+      box-shadow:
+        inset 0 -10px 20px rgba(0, 0, 0, 0.28),
+        inset 0 8px 15px rgba(255, 255, 255, 0.25),
+        0 18px 0 #720039,
+        0 28px 50px rgba(239, 25, 129, 0.45);
+      transition:
+        transform 0.12s ease,
+        box-shadow 0.12s ease,
+        filter 0.12s ease,
+        opacity 0.12s ease;
+    }
+
+    .bip-button:hover:not(:disabled) {
+      transform: translateY(-4px) scale(1.03);
+      filter: brightness(1.08);
+      box-shadow:
+        inset 0 -10px 20px rgba(0, 0, 0, 0.28),
+        inset 0 8px 15px rgba(255, 255, 255, 0.25),
+        0 22px 0 #720039,
+        0 38px 70px rgba(239, 25, 129, 0.6);
+    }
+
+    .bip-button:active:not(:disabled) {
+      transform: translateY(12px) scale(0.98);
+      box-shadow:
+        inset 0 -8px 18px rgba(0, 0, 0, 0.32),
+        inset 0 8px 15px rgba(255, 255, 255, 0.2),
+        0 6px 0 #720039,
+        0 18px 35px rgba(239, 25, 129, 0.4);
+    }
+
+    .bip-button:disabled {
+      cursor: not-allowed;
+      opacity: 0.65;
+    }
+
+    .status {
+      min-height: 28px;
+      margin-top: 32px;
+      color: #f1f1f1;
+      font-size: 0.95rem;
+    }
+
+    .secret {
+      margin-top: 18px;
+      color: rgba(255, 255, 255, 0.35);
+      font-size: 0.78rem;
+    }
+
+    .pulse {
+      animation: pulse 0.55s ease;
+    }
+
+    @keyframes pulse {
+      0% {
+        transform: scale(1);
+      }
+
+      45% {
+        transform: scale(1.08);
+      }
+
+      100% {
+        transform: scale(1);
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="noise"></div>
+
+  <main class="card">
+    <div class="badge">👀 biper presque secret</div>
+
+    <h1>BIP</h1>
+
+    <p class="subtitle">
+      Appuie seulement si tu penses vraiment avoir entendu un bip.
+    </p>
+
+    <button id="bipButton" class="bip-button" onclick="sendBip()">
+      BIP
+    </button>
+
+    <div id="status" class="status"></div>
+
+    <div class="secret">
+      aucune promesse. seulement des bips.
+    </div>
+  </main>
+
+  <!-- Iframe invisible : reçoit la réponse de Google Form sans changer de page -->
+  <iframe
+    name="hidden_iframe"
+    id="hidden_iframe"
+    style="display: none;"
+  ></iframe>
+
+  <!-- Formulaire caché envoyé à Google Forms -->
+  <form
+    id="bipForm"
+    action="https://docs.google.com/forms/d/e/1FAIpQLSexte85q2U6GS90exQuqxyM7uLn2dWJPL5XG-T-i1l1FeVFlg/formResponse"
+    method="POST"
+    target="hidden_iframe"
+    style="display: none;"
+  >
+    <input type="hidden" name="entry.1214614171" value="BIP" />
+  </form>
+
+  <script>
+    const COOLDOWN_MS = 30000;
+
+    function sendBip() {
+      const button = document.getElementById("bipButton");
+      const status = document.getElementById("status");
+      const form = document.getElementById("bipForm");
+
+      const lastBip = Number(localStorage.getItem("lastBip") || 0);
+      const now = Date.now();
+
+      if (now - lastBip < COOLDOWN_MS) {
+        const secondsLeft = Math.ceil((COOLDOWN_MS - (now - lastBip)) / 1000);
+        status.textContent = `Calme le bip. Réessaie dans ${secondsLeft}s 👀`;
+        return;
+      }
+
+      button.disabled = true;
+      button.classList.add("pulse");
+      status.textContent = "Envoi du bip...";
+
+      try {
+        form.submit();
+
+        localStorage.setItem("lastBip", String(Date.now()));
+
+        setTimeout(() => {
+          status.textContent = "Bip envoyé. Opération presque invisible 🫡";
+          button.disabled = false;
+          button.classList.remove("pulse");
+        }, 1000);
+      } catch (error) {
+        status.textContent = "Le bip a échoué. Tragédie.";
+        button.disabled = false;
+        button.classList.remove("pulse");
+        console.error(error);
+      }
+    }
+  </script>
+</body>
+</html>
